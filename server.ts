@@ -4,6 +4,9 @@ import { join, basename } from "path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 
 const app = express();
+
+// Track active step abort controllers
+let activeAbort: AbortController | null = null;
 const PORT = 3111;
 
 // Configure your pipeline directory (where .md files live)
@@ -58,6 +61,17 @@ app.get("/api/steps", async (_req, res) => {
   }
 });
 
+// ── API: Abort the currently running step ────────────────────────
+app.post("/api/abort", (_req, res) => {
+  if (activeAbort) {
+    activeAbort.abort();
+    activeAbort = null;
+    res.json({ ok: true, message: "Aborted" });
+  } else {
+    res.json({ ok: true, message: "Nothing running" });
+  }
+});
+
 // ── API: Run a pipeline step (SSE stream) ─────────────────────────
 app.get("/api/run/:stepId", async (req, res) => {
   const stepId = req.params.stepId;
@@ -73,6 +87,10 @@ app.get("/api/run/:stepId", async (req, res) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
+  // Set up abort controller for this run
+  const abortController = new AbortController();
+  activeAbort = abortController;
+
   try {
     const promptContent = await readFile(filePath, "utf-8");
     send("status", { message: `Running step: ${stepId}`, phase: "starting" });
@@ -83,10 +101,16 @@ app.get("/api/run/:stepId", async (req, res) => {
         allowedTools: ["Read", "Write", "Edit", "MultiEdit", "Bash", "Glob", "Grep", "WebSearch", "WebFetch"],
         permissionMode: "acceptEdits",
         cwd: WORKING_DIR,
+        abortController,
       },
     });
 
     for await (const message of stream) {
+      if (abortController.signal.aborted) {
+        send("status", { message: "Step aborted", phase: "aborted" });
+        break;
+      }
+
       switch (message.type) {
         case "system":
           if (message.subtype === "init") {
@@ -120,10 +144,17 @@ app.get("/api/run/:stepId", async (req, res) => {
       }
     }
 
-    send("done", { message: "Step completed" });
+    if (!abortController.signal.aborted) {
+      send("done", { message: "Step completed" });
+    }
   } catch (err: any) {
-    send("error", { message: err.message });
+    if (abortController.signal.aborted) {
+      send("status", { message: "Step aborted", phase: "aborted" });
+    } else {
+      send("error", { message: err.message });
+    }
   } finally {
+    if (activeAbort === abortController) activeAbort = null;
     res.end();
   }
 });

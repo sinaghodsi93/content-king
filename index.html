@@ -215,6 +215,83 @@
     cursor: not-allowed;
   }
 
+  .btn-run.paused {
+    background: var(--warn);
+    color: #000;
+  }
+
+  .btn-run.paused:hover {
+    background: #fbbf24;
+  }
+
+  /* ── Pipeline controls ────────────── */
+  .pipeline-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-pipeline {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .btn-pipeline:hover {
+    border-color: var(--border-active);
+    background: var(--surface);
+  }
+
+  .btn-pipeline.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .btn-pipeline.primary:hover {
+    background: #2dd66b;
+  }
+
+  .btn-pipeline.warn {
+    color: var(--warn);
+    border-color: var(--warn);
+  }
+
+  .btn-pipeline.danger {
+    color: var(--error);
+    border-color: var(--error);
+  }
+
+  .btn-pipeline:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .pipeline-status {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+
+  .pipeline-status.active {
+    color: var(--accent);
+  }
+
+  .pipeline-status.paused {
+    color: var(--warn);
+  }
+
   /* ── Tabs ────────────────────────────── */
   .tabs {
     display: flex;
@@ -447,6 +524,13 @@
     <div class="sidebar-header">
       <h1>Pipeline</h1>
       <p id="stepCount">loading…</p>
+      <div class="pipeline-controls" style="margin-top: 12px;">
+        <button class="btn-pipeline primary" id="pipelineRunBtn" title="Run all steps automatically">▶ Run All</button>
+        <button class="btn-pipeline warn" id="pipelinePauseBtn" title="Pause after current step" style="display:none">⏸ Pause</button>
+        <button class="btn-pipeline primary" id="pipelineResumeBtn" title="Resume pipeline" style="display:none">▶ Resume</button>
+        <button class="btn-pipeline danger" id="pipelineStopBtn" title="Abort pipeline" style="display:none">■ Stop</button>
+      </div>
+      <div class="pipeline-status" id="pipelineStatus"></div>
     </div>
     <div class="steps-list" id="stepsList"></div>
   </div>
@@ -541,6 +625,11 @@
   let isRunning = false;
   let stepStatuses = {}; // stepId → 'idle' | 'running' | 'done' | 'error'
 
+  // Pipeline auto-run state
+  let pipelineRunning = false;
+  let pipelinePaused = false;
+  let pipelineAborted = false;
+
   const stepsList = document.getElementById('stepsList');
   const outputArea = document.getElementById('outputArea');
   const sourceView = document.getElementById('sourceView');
@@ -548,6 +637,13 @@
   const activeTitle = document.getElementById('activeTitle');
   const activeFile = document.getElementById('activeFile');
   const stepCount = document.getElementById('stepCount');
+
+  // Pipeline control elements
+  const pipelineRunBtn = document.getElementById('pipelineRunBtn');
+  const pipelinePauseBtn = document.getElementById('pipelinePauseBtn');
+  const pipelineResumeBtn = document.getElementById('pipelineResumeBtn');
+  const pipelineStopBtn = document.getElementById('pipelineStopBtn');
+  const pipelineStatus = document.getElementById('pipelineStatus');
 
   // ── Load steps ─────────────────────────
   async function loadSteps() {
@@ -618,73 +714,217 @@
   });
 
   function runStep(stepId) {
-    isRunning = true;
-    stepStatuses[stepId] = 'running';
-    runBtn.className = 'btn-run running';
-    runBtn.textContent = '⟳ Running…';
-    runBtn.disabled = true;
-    renderStepsList();
+    return new Promise((resolve) => {
+      isRunning = true;
+      stepStatuses[stepId] = 'running';
+      runBtn.className = 'btn-run running';
+      runBtn.textContent = '⟳ Running…';
+      runBtn.disabled = true;
 
-    outputArea.innerHTML = '';
-    showTab('output');
-
-    const es = new EventSource(`/api/run/${stepId}`);
-
-    es.addEventListener('text', (e) => {
-      const { content } = JSON.parse(e.data);
-      appendOutput('text', content);
-    });
-
-    es.addEventListener('tool_call', (e) => {
-      const { tool, input } = JSON.parse(e.data);
-      appendOutput('tool', `⚙ ${tool}  ${input}`);
-    });
-
-    es.addEventListener('system', (e) => {
-      const { sessionId } = JSON.parse(e.data);
-      appendOutput('system', `session: ${sessionId}`);
-    });
-
-    es.addEventListener('status', (e) => {
-      const { message } = JSON.parse(e.data);
-      appendOutput('system', message);
-    });
-
-    es.addEventListener('result', (e) => {
-      const { subtype, result } = JSON.parse(e.data);
-      appendOutput('result', `✓ ${subtype}${result ? '\n' + result : ''}`);
-    });
-
-    es.addEventListener('error', (e) => {
-      try {
-        const { message } = JSON.parse(e.data);
-        appendOutput('error', `✗ ${message}`);
-      } catch {
-        appendOutput('error', '✗ Connection error');
+      // Auto-select this step in the sidebar
+      activeStep = steps.find(s => s.id === stepId);
+      if (activeStep) {
+        activeTitle.textContent = activeStep.title;
+        activeFile.textContent = activeStep.filename;
+        hideBriefForm();
+        runBtn.style.display = '';
       }
-      finish('error');
-    });
-
-    es.addEventListener('done', () => {
-      finish('done');
-    });
-
-    // EventSource auto-retries on error; close it cleanly
-    es.onerror = () => {
-      es.close();
-      if (isRunning) finish('error');
-    };
-
-    function finish(status) {
-      es.close();
-      isRunning = false;
-      stepStatuses[stepId] = status;
-      runBtn.className = 'btn-run ready';
-      runBtn.textContent = '▶ Run';
-      runBtn.disabled = false;
       renderStepsList();
+
+      outputArea.innerHTML = '';
+      showTab('output');
+
+      const es = new EventSource(`/api/run/${stepId}`);
+
+      es.addEventListener('text', (e) => {
+        const { content } = JSON.parse(e.data);
+        appendOutput('text', content);
+      });
+
+      es.addEventListener('tool_call', (e) => {
+        const { tool, input } = JSON.parse(e.data);
+        appendOutput('tool', `⚙ ${tool}  ${input}`);
+      });
+
+      es.addEventListener('system', (e) => {
+        const { sessionId } = JSON.parse(e.data);
+        appendOutput('system', `session: ${sessionId}`);
+      });
+
+      es.addEventListener('status', (e) => {
+        const { message } = JSON.parse(e.data);
+        appendOutput('system', message);
+      });
+
+      es.addEventListener('result', (e) => {
+        const { subtype, result } = JSON.parse(e.data);
+        appendOutput('result', `✓ ${subtype}${result ? '\n' + result : ''}`);
+      });
+
+      es.addEventListener('error', (e) => {
+        try {
+          const { message } = JSON.parse(e.data);
+          appendOutput('error', `✗ ${message}`);
+        } catch {
+          appendOutput('error', '✗ Connection error');
+        }
+        finish('error');
+      });
+
+      es.addEventListener('done', () => {
+        finish('done');
+      });
+
+      es.onerror = () => {
+        es.close();
+        if (isRunning) finish('error');
+      };
+
+      function finish(status) {
+        es.close();
+        isRunning = false;
+        stepStatuses[stepId] = status;
+        runBtn.className = 'btn-run ready';
+        runBtn.textContent = '▶ Run';
+        runBtn.disabled = false;
+        renderStepsList();
+        resolve(status);
+      }
+    });
+  }
+
+  // ── Pipeline auto-run ────────────────────
+  function updatePipelineUI() {
+    if (pipelineRunning && !pipelinePaused) {
+      pipelineRunBtn.style.display = 'none';
+      pipelinePauseBtn.style.display = '';
+      pipelineResumeBtn.style.display = 'none';
+      pipelineStopBtn.style.display = '';
+      runBtn.disabled = true;
+    } else if (pipelineRunning && pipelinePaused) {
+      pipelineRunBtn.style.display = 'none';
+      pipelinePauseBtn.style.display = 'none';
+      pipelineResumeBtn.style.display = '';
+      pipelineStopBtn.style.display = '';
+      runBtn.disabled = false;
+    } else {
+      pipelineRunBtn.style.display = '';
+      pipelinePauseBtn.style.display = 'none';
+      pipelineResumeBtn.style.display = 'none';
+      pipelineStopBtn.style.display = 'none';
     }
   }
+
+  function setPipelineStatus(text, cls) {
+    pipelineStatus.textContent = text;
+    pipelineStatus.className = 'pipeline-status' + (cls ? ' ' + cls : '');
+  }
+
+  async function runPipeline(startFromIndex = 0) {
+    pipelineRunning = true;
+    pipelinePaused = false;
+    pipelineAborted = false;
+    updatePipelineUI();
+
+    for (let i = startFromIndex; i < steps.length; i++) {
+      const step = steps[i];
+
+      // Skip already-done steps
+      if (stepStatuses[step.id] === 'done') {
+        setPipelineStatus(`Skipping ${step.id} (done)`, 'active');
+        continue;
+      }
+
+      // Check for pause
+      if (pipelinePaused) {
+        setPipelineStatus(`Paused before ${step.id}`, 'paused');
+        updatePipelineUI();
+        return; // Exit — resume will call runPipeline again
+      }
+
+      // Check for abort
+      if (pipelineAborted) {
+        setPipelineStatus('Pipeline stopped', '');
+        pipelineRunning = false;
+        updatePipelineUI();
+        return;
+      }
+
+      setPipelineStatus(`Running step ${i + 1}/${steps.length}: ${step.id}`, 'active');
+      const result = await runStep(step.id);
+
+      if (result === 'error') {
+        setPipelineStatus(`Pipeline stopped — ${step.id} failed`, '');
+        pipelineRunning = false;
+        updatePipelineUI();
+        return;
+      }
+
+      // Check pause again after step completes
+      if (pipelinePaused) {
+        setPipelineStatus(`Paused after ${step.id}`, 'paused');
+        updatePipelineUI();
+        return;
+      }
+
+      if (pipelineAborted) {
+        setPipelineStatus('Pipeline stopped', '');
+        pipelineRunning = false;
+        updatePipelineUI();
+        return;
+      }
+    }
+
+    setPipelineStatus('Pipeline complete', 'active');
+    pipelineRunning = false;
+    updatePipelineUI();
+  }
+
+  // Find next incomplete step index
+  function getNextStepIndex() {
+    for (let i = 0; i < steps.length; i++) {
+      if (stepStatuses[steps[i].id] !== 'done') return i;
+    }
+    return steps.length;
+  }
+
+  pipelineRunBtn.addEventListener('click', () => {
+    if (pipelineRunning || isRunning) return;
+
+    // If step 00 brief hasn't been done yet, require it first
+    if (stepStatuses['00-brief'] !== 'done') {
+      selectStep('00-brief');
+      setPipelineStatus('Fill in the brief first, then Run All', '');
+      return;
+    }
+
+    runPipeline(getNextStepIndex());
+  });
+
+  pipelinePauseBtn.addEventListener('click', () => {
+    pipelinePaused = true;
+    setPipelineStatus('Pausing after current step…', 'paused');
+    updatePipelineUI();
+  });
+
+  pipelineResumeBtn.addEventListener('click', () => {
+    pipelinePaused = false;
+    setPipelineStatus('Resuming…', 'active');
+    runPipeline(getNextStepIndex());
+  });
+
+  pipelineStopBtn.addEventListener('click', async () => {
+    pipelineAborted = true;
+    pipelinePaused = false;
+    setPipelineStatus('Stopping…', '');
+
+    // Abort the currently running step on the server
+    if (isRunning) {
+      try { await fetch('/api/abort', { method: 'POST' }); } catch {}
+    }
+
+    updatePipelineUI();
+  });
 
   function appendOutput(type, content) {
     const div = document.createElement('div');
@@ -790,10 +1030,10 @@ ${features ? features.split('\n').map(f => `  - ${f.trim()}`).join('\n') : '  - 
       briefSaved.classList.add('show');
       setTimeout(() => briefSaved.classList.remove('show'), 2000);
 
-      // Auto-run step 00
+      // Auto-run the full pipeline starting from step 00
       hideBriefForm();
       showTab('output');
-      runStep('00-brief');
+      runPipeline(0);
     } catch (err) {
       alert('Error saving brief: ' + err.message);
     }

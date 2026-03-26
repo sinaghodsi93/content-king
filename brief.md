@@ -1,15 +1,18 @@
 # Content Request
 
 ## What to generate
-[e.g., "Launch video script, 60 seconds" or "Twitter thread, 10 tweets"]
+Launch video script, 60s
 
 ## Product Brief
-- **Brand/Product Name:** [name]
-- **What it does:** [1-2 sentences]
-- **Who it's for:** [target audience]
+- **Brand/Product Name:** yolidue
+- **What it does:** An AI coaching companion that keeps indie hackers building every single day. Three minutes. That's all it takes.
+- **Who it's for:** indie hackers and solo founders
 - **Key features:**
-  - [feature 1]
-  - [feature 2]
-  - [feature 3]
-- **What makes it different:** [differentiator]
-- **Tone:** [hype / calm authority / playful / technical / aspirational]
+  - Streak Tracking
+  - Coach Pulse
+  - Voice-First
+  - Project Management
+  - Progress Reviews
+  - Bring Your Own Key
+- **What makes it different:** [not specified]
+- **Tone:** hype
