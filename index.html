@@ -1199,7 +1199,608 @@
     opacity: 0.3;
   }
 
-  /* ── Rendered Markdown ──────────────── */
+  /* ── Content Viewer: Shared ──────────── */
+  .cv {
+    max-width: 720px;
+    margin: 0 auto;
+    font-family: var(--sans);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .cv-header {
+    margin-bottom: 32px;
+  }
+
+  .cv-header h1 {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .cv-subtitle {
+    padding: 10px 16px;
+    border-left: 3px solid var(--amber);
+    background: var(--amber-glow);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--text-mid);
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .cv-subtitle strong {
+    color: var(--amber-text);
+  }
+
+  /* ── Metadata Table (shared) ────────── */
+  .cv-meta {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cv-meta h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+
+  .cv-meta table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .cv-meta th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    width: 40%;
+  }
+
+  .cv-meta td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .cv-meta tr:hover td {
+    background: var(--surface);
+  }
+
+  /* ════════════════════════════════════════
+     TWITTER / X THREAD
+     ════════════════════════════════════════ */
+  .tweet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+
+  .tweet-card:hover {
+    border-color: var(--border-active);
+  }
+
+  .tweet-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .tweet-card-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  .tweet-card-role {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    background: var(--amber-glow);
+    color: var(--amber-text);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .tweet-card-body {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-line;
+  }
+
+  .tweet-card-footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tweet-char-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .tweet-char-count.over {
+    color: var(--error);
+  }
+
+  .tweet-copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tweet-copy-btn:hover {
+    border-color: var(--border-active);
+    color: var(--text);
+  }
+
+  .tweet-connector {
+    width: 2px;
+    height: 16px;
+    background: var(--border);
+    margin: 0 auto;
+    margin-bottom: 0;
+    margin-top: -16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ════════════════════════════════════════
+     VIDEO SCRIPT (Launch Video + YouTube Ad)
+     ════════════════════════════════════════ */
+  .scene-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .scene-card:hover {
+    border-color: var(--border-active);
+  }
+
+  .scene-card-header {
+    padding: 14px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .scene-card-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .scene-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--amber-glow);
+    border: 1px solid var(--amber-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--amber-text);
+    flex-shrink: 0;
+  }
+
+  .scene-time {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 3px 10px;
+    background: var(--bg);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+  }
+
+  .scene-card-body {
+    padding: 20px;
+  }
+
+  .scene-field {
+    margin-bottom: 16px;
+  }
+
+  .scene-field:last-child {
+    margin-bottom: 0;
+  }
+
+  .scene-field-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .scene-field-label.visual { color: #818CF8; }
+  .scene-field-label.delivery { color: #F472B6; }
+  .scene-field-label.copy { color: var(--amber-text); }
+
+  .scene-field-value {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .scene-field-value.copy-text {
+    padding: 12px 16px;
+    background: var(--bg);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 16px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  .scene-timeline {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 32px;
+    align-items: center;
+  }
+
+  .scene-timeline-seg {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .scene-timeline-seg.filled {
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .scene-timeline-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  /* ════════════════════════════════════════
+     LANDING PAGE HERO
+     ════════════════════════════════════════ */
+  .lp-preview {
+    margin-bottom: 40px;
+  }
+
+  .lp-hero-frame {
+    background: linear-gradient(145deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 56px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lp-hero-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, var(--amber-glow) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .lp-headline {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .lp-subheadline {
+    font-size: 17px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    max-width: 500px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .lp-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto 28px;
+    max-width: 420px;
+    text-align: left;
+    position: relative;
+  }
+
+  .lp-bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .lp-bullet-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--amber-glow);
+    border: 1px solid var(--amber-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--amber-text);
+    margin-top: 1px;
+  }
+
+  .lp-social-proof {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    font-style: italic;
+    position: relative;
+  }
+
+  .lp-cta-btn {
+    display: inline-block;
+    padding: 14px 36px;
+    background: var(--amber);
+    color: #000;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: default;
+    position: relative;
+    letter-spacing: -0.01em;
+  }
+
+  .lp-cta-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    position: relative;
+  }
+
+  .lp-section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    margin-top: 28px;
+  }
+
+  .lp-raw-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .lp-raw-section h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--amber-text);
+    margin-bottom: 10px;
+  }
+
+  .lp-raw-section p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .lp-raw-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ════════════════════════════════════════
+     PRODUCT HUNT LAUNCH
+     ════════════════════════════════════════ */
+  .ph-preview {
+    margin-bottom: 40px;
+  }
+
+  .ph-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .ph-card-header {
+    padding: 20px 24px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ph-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+    font-family: var(--display);
+    flex-shrink: 0;
+  }
+
+  .ph-title-area h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .ph-tagline {
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+
+  .ph-upvote {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .ph-upvote-arrow {
+    font-size: 16px;
+    color: var(--text-dim);
+  }
+
+  .ph-upvote-count {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+
+  .ph-description {
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .ph-section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .ph-maker-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+
+  .ph-maker-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .ph-maker-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .ph-maker-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .ph-maker-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--amber-glow);
+    color: var(--amber-text);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+  }
+
+  .ph-maker-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-line;
+  }
+
+  /* ════════════════════════════════════════
+     FALLBACK / GENERIC MARKDOWN
+     ════════════════════════════════════════ */
   .rendered-md {
     max-width: 720px;
     margin: 0 auto;
@@ -1208,132 +1809,23 @@
     line-height: 1.7;
   }
 
-  .rendered-md h1 {
-    font-family: var(--display);
-    font-weight: 900;
-    font-size: 28px;
-    letter-spacing: -0.03em;
-    margin-bottom: 8px;
-    color: var(--text);
-    line-height: 1.2;
-  }
-
-  .rendered-md h2 {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: -0.02em;
-    margin-top: 40px;
-    margin-bottom: 16px;
-    color: var(--text);
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .rendered-md h2:first-child {
-    margin-top: 0;
-  }
-
-  .rendered-md h3 {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 16px;
-    margin-top: 28px;
-    margin-bottom: 12px;
-    color: var(--amber-text);
-  }
-
-  .rendered-md p {
-    margin-bottom: 16px;
-    font-size: 15px;
-  }
-
-  .rendered-md blockquote {
-    margin: 0 0 20px 0;
-    padding: 12px 20px;
-    border-left: 3px solid var(--amber);
-    background: var(--amber-glow);
-    border-radius: 0 var(--radius-md) var(--radius-md) 0;
-    color: var(--text-mid);
-    font-size: 14px;
-  }
-
-  .rendered-md blockquote strong {
-    color: var(--amber-text);
-  }
-
-  .rendered-md hr {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 28px 0;
-  }
-
-  .rendered-md ul, .rendered-md ol {
-    margin-bottom: 16px;
-    padding-left: 24px;
-  }
-
-  .rendered-md li {
-    margin-bottom: 6px;
-    font-size: 15px;
-  }
-
-  .rendered-md strong {
-    font-weight: 700;
-    color: var(--text);
-  }
-
-  .rendered-md em {
-    font-style: italic;
-    color: var(--text-mid);
-  }
-
-  .rendered-md code {
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 2px 8px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--amber-text);
-  }
-
-  .rendered-md table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 24px 0;
-    font-size: 13px;
-    font-family: var(--mono);
-  }
-
-  .rendered-md th {
-    text-align: left;
-    padding: 10px 14px;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text-mid);
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .rendered-md td {
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-
-  .rendered-md tr:hover td {
-    background: var(--surface);
-  }
-
-  /* Tweet card styling for thread content */
-  .rendered-md h2 + p,
-  .rendered-md h2 + p + p {
-    font-size: 16px;
-    line-height: 1.6;
-  }
+  .rendered-md h1 { font-family: var(--display); font-weight: 900; font-size: 28px; letter-spacing: -0.03em; margin-bottom: 8px; line-height: 1.2; }
+  .rendered-md h2 { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin-top: 40px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .rendered-md h2:first-child { margin-top: 0; }
+  .rendered-md h3 { font-family: var(--display); font-weight: 700; font-size: 16px; margin-top: 28px; margin-bottom: 12px; color: var(--amber-text); }
+  .rendered-md p { margin-bottom: 16px; font-size: 15px; }
+  .rendered-md blockquote { margin: 0 0 20px 0; padding: 12px 20px; border-left: 3px solid var(--amber); background: var(--amber-glow); border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--text-mid); font-size: 14px; }
+  .rendered-md blockquote strong { color: var(--amber-text); }
+  .rendered-md hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .rendered-md ul, .rendered-md ol { margin-bottom: 16px; padding-left: 24px; }
+  .rendered-md li { margin-bottom: 6px; font-size: 15px; }
+  .rendered-md strong { font-weight: 700; color: var(--text); }
+  .rendered-md em { font-style: italic; color: var(--text-mid); }
+  .rendered-md code { font-family: var(--mono); font-size: 13px; padding: 2px 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--amber-text); }
+  .rendered-md table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; font-family: var(--mono); }
+  .rendered-md th { text-align: left; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rendered-md td { padding: 10px 14px; border: 1px solid var(--border); color: var(--text); }
+  .rendered-md tr:hover td { background: var(--surface); }
 
   @media (max-width: 800px) {
     .outputs-layout {
@@ -1360,6 +1852,18 @@
 
     .output-viewer-body {
       padding: 24px 20px 48px;
+    }
+
+    .lp-hero-frame {
+      padding: 36px 24px;
+    }
+
+    .ph-card-header {
+      flex-wrap: wrap;
+    }
+
+    .ph-upvote {
+      margin-left: 0;
     }
   }
 </style>
@@ -2166,7 +2670,7 @@
       const res = await fetch(`/api/outputs/${encodeURIComponent(filename)}`);
       const { content } = await res.json();
 
-      viewerBody.innerHTML = `<div class="rendered-md">${renderMarkdown(content)}</div>`;
+      viewerBody.innerHTML = renderContent(content, filename);
 
       document.getElementById('btnCopyRaw').addEventListener('click', () => {
         navigator.clipboard.writeText(content);
@@ -2203,30 +2707,431 @@
     }
   }
 
-  // ── Simple Markdown Renderer ──────────────
-  function renderMarkdown(md) {
-    // Escape HTML first
-    let html = md
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+  // ── Content Type Detection ─────────────────
+  function detectContentType(md) {
+    const lower = md.toLowerCase();
+    if (lower.includes('twitter/x thread') || lower.includes('tweet 1/')) return 'twitter';
+    if (lower.includes('youtube ad')) return 'youtube-ad';
+    if (lower.includes('launch video')) return 'launch-video';
+    if (lower.includes('landing page hero')) return 'landing-page';
+    if (lower.includes('product hunt')) return 'product-hunt';
+    return 'generic';
+  }
 
-    // Code blocks (``` ... ```)
-    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
-      `<pre><code>${code.trim()}</code></pre>`
-    );
+  // ── Content Renderer Dispatcher ───────────
+  function renderContent(md, filename) {
+    const type = detectContentType(md);
+    const parts = splitMetadata(md);
+
+    const renderers = {
+      'twitter': renderTwitterThread,
+      'youtube-ad': renderVideoScript,
+      'launch-video': renderVideoScript,
+      'landing-page': renderLandingPage,
+      'product-hunt': renderProductHunt,
+      'generic': renderGenericMarkdown,
+    };
+
+    return (renderers[type] || renderGenericMarkdown)(parts.body, parts.metadata, md);
+  }
+
+  // ── Split content from metadata ───────────
+  function splitMetadata(md) {
+    const metaIdx = md.indexOf('## Metadata');
+    if (metaIdx === -1) return { body: md, metadata: '' };
+
+    // Walk back past any trailing ---
+    let bodyEnd = metaIdx;
+    const before = md.substring(0, metaIdx).trimEnd();
+    return { body: before, metadata: md.substring(metaIdx) };
+  }
+
+  // ── Extract title + subtitle ──────────────
+  function extractHeader(md) {
+    const titleMatch = md.match(/^#\s+(.+)$/m);
+    const subMatch = md.match(/^>\s*(.+)$/m);
+    return {
+      title: titleMatch ? titleMatch[1] : '',
+      subtitle: subMatch ? subMatch[1].replace(/\*\*/g, '').replace(/\*/g, '') : '',
+    };
+  }
+
+  // ── Render metadata table ─────────────────
+  function renderMetadataSection(metaMd) {
+    if (!metaMd) return '';
+    const rows = [];
+    const lines = metaMd.split('\n');
+    for (const line of lines) {
+      if (!line.startsWith('|') || line.includes('---')) continue;
+      const cols = line.split('|').map(c => c.trim()).filter(Boolean);
+      if (cols.length >= 2 && cols[0] !== 'Field') {
+        rows.push({ key: inlineFormat(cols[0]), val: inlineFormat(cols[1]) });
+      }
+    }
+    if (rows.length === 0) return '';
+    return `
+      <div class="cv-meta">
+        <h2>Metadata</h2>
+        <table>
+          <tbody>${rows.map(r => `<tr><th>${r.key}</th><td>${r.val}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ════════════════════════════════════════════
+  //  TWITTER / X THREAD RENDERER
+  // ════════════════════════════════════════════
+  function renderTwitterThread(body, metaMd) {
+    const header = extractHeader(body);
+
+    // Parse tweets: split by ## Tweet headers
+    const tweetRegex = /## Tweet (\d+)\/(\d+)\s*—?\s*(.*?)\n([\s\S]*?)(?=\n## Tweet|\n---\n---|\n## Metadata|$)/g;
+    const tweets = [];
+    let match;
+    while ((match = tweetRegex.exec(body)) !== null) {
+      const num = match[1];
+      const total = match[2];
+      const role = match[3].trim();
+      const text = match[4].replace(/\n---\s*$/g, '').trim();
+      tweets.push({ num, total, role, text });
+    }
+
+    let html = `<div class="cv">`;
+    html += `<div class="cv-header">
+      <h1>${inlineFormat(header.title)}</h1>
+      ${header.subtitle ? `<div class="cv-subtitle">${inlineFormat(header.subtitle)}</div>` : ''}
+    </div>`;
+
+    for (let i = 0; i < tweets.length; i++) {
+      const t = tweets[i];
+      const charCount = t.text.length;
+      const isOver = charCount > 280;
+
+      if (i > 0) {
+        html += `<div class="tweet-connector"></div>`;
+      }
+
+      html += `
+        <div class="tweet-card">
+          <div class="tweet-card-header">
+            <span class="tweet-card-label">Tweet ${t.num}/${t.total}</span>
+            ${t.role ? `<span class="tweet-card-role">${esc(t.role)}</span>` : ''}
+          </div>
+          <div class="tweet-card-body">${esc(t.text)}</div>
+          <div class="tweet-card-footer">
+            <span class="tweet-char-count ${isOver ? 'over' : ''}">${charCount}/280</span>
+            <button class="tweet-copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(t.text)});this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)">Copy</button>
+          </div>
+        </div>
+      `;
+    }
+
+    html += renderMetadataSection(metaMd);
+    html += `</div>`;
+    return html;
+  }
+
+  // ════════════════════════════════════════════
+  //  VIDEO SCRIPT RENDERER (Launch Video + YouTube Ad)
+  // ════════════════════════════════════════════
+  function renderVideoScript(body, metaMd) {
+    const header = extractHeader(body);
+
+    // Parse scenes: ## Scene N — Title  or similar heading patterns
+    const sceneRegex = /## (?:Scene\s*)?(\d+)\s*—?\s*(.*?)\n([\s\S]*?)(?=\n## (?:Scene\s*)?\d|\n---\n---|\n## Metadata|$)/g;
+    let scenes = [];
+    let match;
+    while ((match = sceneRegex.exec(body)) !== null) {
+      const num = match[1];
+      const name = match[2].trim();
+      const content = match[3].replace(/\n---\s*$/g, '').trim();
+
+      // Parse structured fields
+      const visual = extractField(content, 'Visual');
+      const delivery = extractField(content, 'Delivery');
+      const copy = extractField(content, 'Copy');
+      const time = extractField(content, 'Time');
+      const rawText = (!visual && !delivery && !copy) ? content : null;
+
+      scenes.push({ num, name, visual, delivery, copy, time, rawText });
+    }
+
+    // Fallback: try ## heading patterns without "Scene" prefix
+    if (scenes.length === 0) {
+      const headingRegex = /## (.+?)(?:\s*—\s*(.+?))?\n([\s\S]*?)(?=\n## |\n---\n---|\n## Metadata|$)/g;
+      let idx = 1;
+      while ((match = headingRegex.exec(body)) !== null) {
+        const fullTitle = match[1].trim();
+        if (fullTitle === 'Metadata') continue;
+        const subtitle = match[2]?.trim() || '';
+        const content = match[3].replace(/\n---\s*$/g, '').trim();
+
+        const visual = extractField(content, 'Visual');
+        const delivery = extractField(content, 'Delivery');
+        const copy = extractField(content, 'Copy');
+        const time = extractField(content, 'Time');
+        const rawText = (!visual && !delivery && !copy) ? content : null;
+
+        scenes.push({ num: String(idx++), name: subtitle || fullTitle, visual, delivery, copy, time, rawText });
+      }
+    }
+
+    let html = `<div class="cv">`;
+    html += `<div class="cv-header">
+      <h1>${inlineFormat(header.title)}</h1>
+      ${header.subtitle ? `<div class="cv-subtitle">${inlineFormat(header.subtitle)}</div>` : ''}
+    </div>`;
+
+    // Timeline bar
+    if (scenes.length > 0) {
+      html += `<div class="scene-timeline">`;
+      for (const s of scenes) {
+        html += `<div class="scene-timeline-seg filled" title="Scene ${s.num}: ${esc(s.name)}"></div>`;
+      }
+      const totalTime = scenes.map(s => s.time || '').join(' + ');
+      html += `<span class="scene-timeline-label">${scenes.length} scenes</span>`;
+      html += `</div>`;
+    }
+
+    for (const s of scenes) {
+      html += `
+        <div class="scene-card">
+          <div class="scene-card-header">
+            <div class="scene-card-title">
+              <div class="scene-num">${s.num}</div>
+              ${esc(s.name)}
+            </div>
+            ${s.time ? `<span class="scene-time">${esc(s.time)}</span>` : ''}
+          </div>
+          <div class="scene-card-body">`;
+
+      if (s.rawText) {
+        html += `<div class="scene-field"><div class="scene-field-value">${inlineFormat(esc(s.rawText))}</div></div>`;
+      } else {
+        if (s.visual) {
+          html += `<div class="scene-field"><div class="scene-field-label visual">Visual</div><div class="scene-field-value">${inlineFormat(esc(s.visual))}</div></div>`;
+        }
+        if (s.delivery) {
+          html += `<div class="scene-field"><div class="scene-field-label delivery">Delivery</div><div class="scene-field-value">${inlineFormat(esc(s.delivery))}</div></div>`;
+        }
+        if (s.copy) {
+          html += `<div class="scene-field"><div class="scene-field-label copy">Copy</div><div class="scene-field-value copy-text">${esc(s.copy)}</div></div>`;
+        }
+      }
+
+      html += `</div></div>`;
+    }
+
+    html += renderMetadataSection(metaMd);
+    html += `</div>`;
+    return html;
+  }
+
+  function extractField(text, label) {
+    // Match **Label:** value  or  Label: value
+    const regex = new RegExp(`\\*\\*${label}:\\*\\*\\s*([\\s\\S]*?)(?=\\n\\*\\*\\w|\\n## |$)`, 'i');
+    const match = text.match(regex);
+    if (match) return match[1].trim().replace(/^>\s*/gm, '');
+
+    const simpleRegex = new RegExp(`^${label}:\\s*(.+)$`, 'im');
+    const simpleMatch = text.match(simpleRegex);
+    return simpleMatch ? simpleMatch[1].trim() : null;
+  }
+
+  // ════════════════════════════════════════════
+  //  LANDING PAGE HERO RENDERER
+  // ════════════════════════════════════════════
+  function renderLandingPage(body, metaMd) {
+    const header = extractHeader(body);
+
+    // Extract sections
+    const headline = extractSection(body, 'Headline');
+    const subheadline = extractSection(body, 'Subheadline');
+    const bullets = extractSection(body, 'Feature Bullets');
+    const socialProof = extractSection(body, 'Social Proof');
+    const ctaSection = extractSection(body, 'CTA Button') || extractSection(body, 'CTA');
+
+    // Parse CTA
+    let ctaText = '';
+    let ctaSub = '';
+    if (ctaSection) {
+      const btnMatch = ctaSection.match(/\*\*Button Text:\*\*\s*(.+)/i);
+      const subMatch = ctaSection.match(/\*\*Supporting Line.*?:\*\*\s*(.+)/i);
+      ctaText = btnMatch ? btnMatch[1].trim() : ctaSection.split('\n')[0].trim();
+      ctaSub = subMatch ? subMatch[1].trim() : '';
+    }
+
+    // Parse bullets
+    const bulletItems = [];
+    if (bullets) {
+      const bulletLines = bullets.split('\n').filter(l => l.match(/^[-*]\s/));
+      for (const b of bulletLines) {
+        bulletItems.push(b.replace(/^[-*]\s+/, '').trim());
+      }
+    }
+
+    let html = `<div class="cv">`;
+    html += `<div class="cv-header">
+      <h1>${inlineFormat(header.title)}</h1>
+      ${header.subtitle ? `<div class="cv-subtitle">${inlineFormat(header.subtitle)}</div>` : ''}
+    </div>`;
+
+    // Live preview
+    html += `<div class="lp-preview">`;
+    html += `<div class="lp-section-label">Live Preview</div>`;
+    html += `<div class="lp-hero-frame">`;
+
+    if (headline) html += `<div class="lp-headline">${inlineFormat(esc(headline))}</div>`;
+    if (subheadline) html += `<div class="lp-subheadline">${inlineFormat(esc(subheadline))}</div>`;
+
+    if (bulletItems.length > 0) {
+      html += `<div class="lp-bullets">`;
+      for (const b of bulletItems) {
+        html += `<div class="lp-bullet"><span class="lp-bullet-icon">✓</span><span>${inlineFormat(esc(b))}</span></div>`;
+      }
+      html += `</div>`;
+    }
+
+    if (socialProof) html += `<div class="lp-social-proof">${inlineFormat(esc(socialProof))}</div>`;
+
+    if (ctaText) {
+      html += `<div class="lp-cta-btn">${esc(ctaText)}</div>`;
+      if (ctaSub) html += `<div class="lp-cta-sub">${esc(ctaSub)}</div>`;
+    }
+
+    html += `</div></div>`; // close frame + preview
+
+    // Raw sections below
+    const sections = [
+      { label: 'Headline', text: headline },
+      { label: 'Subheadline', text: subheadline },
+      { label: 'Feature Bullets', text: bullets },
+      { label: 'Social Proof', text: socialProof },
+      { label: 'CTA', text: ctaSection },
+    ].filter(s => s.text);
+
+    for (const s of sections) {
+      html += `
+        <div class="lp-raw-section">
+          <h3>${s.label}</h3>
+          <p>${inlineFormat(esc(s.text))}</p>
+        </div>
+      `;
+    }
+
+    html += renderMetadataSection(metaMd);
+    html += `</div>`;
+    return html;
+  }
+
+  function extractSection(md, sectionName) {
+    const regex = new RegExp(`## ${sectionName}\\n+([\\s\\S]*?)(?=\\n## |$)`, 'i');
+    const match = md.match(regex);
+    if (!match) return null;
+    return match[1].replace(/\n---\s*$/g, '').trim();
+  }
+
+  // ════════════════════════════════════════════
+  //  PRODUCT HUNT LAUNCH RENDERER
+  // ════════════════════════════════════════════
+  function renderProductHunt(body, metaMd) {
+    const header = extractHeader(body);
+
+    const tagline = extractSection(body, 'Tagline');
+    const description = extractSection(body, 'Description');
+    const makerComment = extractSection(body, 'Maker Comment');
+
+    // Try to get brand name from title
+    const brandMatch = header.title.match(/^(.+?)\s*—/);
+    const brand = brandMatch ? brandMatch[1].trim() : 'Product';
+
+    let html = `<div class="cv">`;
+    html += `<div class="cv-header">
+      <h1>${inlineFormat(header.title)}</h1>
+      ${header.subtitle ? `<div class="cv-subtitle">${inlineFormat(header.subtitle)}</div>` : ''}
+    </div>`;
+
+    // PH Card Preview
+    html += `<div class="ph-preview">`;
+    html += `<div class="lp-section-label">Product Hunt Preview</div>`;
+    html += `
+      <div class="ph-card">
+        <div class="ph-card-header">
+          <div class="ph-icon">${brand.charAt(0).toUpperCase()}</div>
+          <div class="ph-title-area">
+            <h3>${esc(brand)}</h3>
+            <div class="ph-tagline">${tagline ? esc(tagline) : ''}</div>
+          </div>
+          <div class="ph-upvote">
+            <span class="ph-upvote-arrow">▲</span>
+            <span class="ph-upvote-count">—</span>
+          </div>
+        </div>
+        ${description ? `<div class="ph-description">${inlineFormat(esc(description))}</div>` : ''}
+      </div>
+    `;
+    html += `</div>`;
+
+    // Maker Comment
+    if (makerComment) {
+      html += `<div class="ph-section-label">Maker Comment</div>`;
+      html += `
+        <div class="ph-maker-card">
+          <div class="ph-maker-header">
+            <div class="ph-maker-avatar">👤</div>
+            <span class="ph-maker-name">Maker</span>
+            <span class="ph-maker-badge">MAKER</span>
+          </div>
+          <div class="ph-maker-body">${inlineFormat(esc(makerComment))}</div>
+        </div>
+      `;
+    }
+
+    // Raw sections
+    const sections = [
+      { label: 'Tagline', text: tagline, limit: '60 chars' },
+      { label: 'Description', text: description, limit: '260 chars' },
+    ].filter(s => s.text);
+
+    if (sections.length > 0) {
+      html += `<div style="margin-top:32px">`;
+      for (const s of sections) {
+        html += `
+          <div class="lp-raw-section">
+            <h3>${s.label} <span style="font-weight:400;font-size:12px;color:var(--text-dim);font-family:var(--mono)">${s.text.length}/${s.limit}</span></h3>
+            <p>${inlineFormat(esc(s.text))}</p>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    }
+
+    html += renderMetadataSection(metaMd);
+    html += `</div>`;
+    return html;
+  }
+
+  // ════════════════════════════════════════════
+  //  GENERIC MARKDOWN RENDERER (fallback)
+  // ════════════════════════════════════════════
+  function renderGenericMarkdown(body, metaMd, fullMd) {
+    return `<div class="rendered-md">${markdownToHtml(fullMd || body)}</div>`;
+  }
+
+  function markdownToHtml(md) {
+    let html = esc(md);
 
     // Tables
-    html = html.replace(/^(\|.+\|)\n(\|[\s-:|]+\|)\n((?:\|.+\|\n?)*)/gm, (_, header, sep, body) => {
+    html = html.replace(/^(\|.+\|)\n(\|[\s-:|]+\|)\n((?:\|.+\|\n?)*)/gm, (_, header, sep, tBody) => {
       const th = header.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
-      const rows = body.trim().split('\n').map(row => {
+      const rows = tBody.trim().split('\n').map(row => {
         const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
         return `<tr>${cells}</tr>`;
       }).join('');
       return `<table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table>`;
     });
 
-    // Process line by line for block elements
     const lines = html.split('\n');
     let result = [];
     let inList = false;
@@ -2235,15 +3140,12 @@
     for (let i = 0; i < lines.length; i++) {
       let line = lines[i];
 
-      // Skip if inside a table or pre block (already processed)
-      if (line.startsWith('<table') || line.startsWith('<pre') || line.startsWith('<thead') ||
-          line.startsWith('<tbody') || line.startsWith('<tr') || line.startsWith('</')) {
+      if (line.startsWith('<table') || line.startsWith('<thead') || line.startsWith('<tbody') || line.startsWith('<tr') || line.startsWith('</')) {
         if (inList) { result.push(`</${listType}>`); inList = false; }
         result.push(line);
         continue;
       }
 
-      // Headings
       if (line.match(/^#{1,6}\s/)) {
         if (inList) { result.push(`</${listType}>`); inList = false; }
         const level = line.match(/^(#{1,6})/)[1].length;
@@ -2252,82 +3154,55 @@
         continue;
       }
 
-      // Horizontal rule
       if (line.match(/^(-{3,}|\*{3,}|_{3,})$/)) {
         if (inList) { result.push(`</${listType}>`); inList = false; }
         result.push('<hr>');
         continue;
       }
 
-      // Blockquote
       if (line.startsWith('&gt; ') || line === '&gt;') {
         if (inList) { result.push(`</${listType}>`); inList = false; }
-        const text = line.replace(/^&gt;\s?/, '');
-        result.push(`<blockquote>${inlineFormat(text)}</blockquote>`);
+        result.push(`<blockquote>${inlineFormat(line.replace(/^&gt;\s?/, ''))}</blockquote>`);
         continue;
       }
 
-      // Unordered list
       if (line.match(/^[\s]*[-*+]\s/)) {
         const text = line.replace(/^[\s]*[-*+]\s+/, '');
-        if (!inList || listType !== 'ul') {
-          if (inList) result.push(`</${listType}>`);
-          result.push('<ul>');
-          inList = true;
-          listType = 'ul';
-        }
+        if (!inList || listType !== 'ul') { if (inList) result.push(`</${listType}>`); result.push('<ul>'); inList = true; listType = 'ul'; }
         result.push(`<li>${inlineFormat(text)}</li>`);
         continue;
       }
 
-      // Ordered list
       if (line.match(/^[\s]*\d+\.\s/)) {
         const text = line.replace(/^[\s]*\d+\.\s+/, '');
-        if (!inList || listType !== 'ol') {
-          if (inList) result.push(`</${listType}>`);
-          result.push('<ol>');
-          inList = true;
-          listType = 'ol';
-        }
+        if (!inList || listType !== 'ol') { if (inList) result.push(`</${listType}>`); result.push('<ol>'); inList = true; listType = 'ol'; }
         result.push(`<li>${inlineFormat(text)}</li>`);
         continue;
       }
 
-      // Close list if needed
-      if (inList && line.trim() === '') {
-        result.push(`</${listType}>`);
-        inList = false;
-      }
+      if (inList && line.trim() === '') { result.push(`</${listType}>`); inList = false; }
+      if (line.trim() === '') continue;
 
-      // Empty line
-      if (line.trim() === '') {
-        continue;
-      }
-
-      // Paragraph
       if (inList) { result.push(`</${listType}>`); inList = false; }
       result.push(`<p>${inlineFormat(line)}</p>`);
     }
 
     if (inList) result.push(`</${listType}>`);
-
     return result.join('\n');
   }
 
+  // ── Inline formatting ─────────────────────
   function inlineFormat(text) {
-    // Inline code
     text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // Bold + italic
     text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-    // Bold
     text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // Italic
     text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    // Links
     text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--amber-text)">$1</a>');
-    // Unicode arrows that got escaped
-    text = text.replace(/→/g, '→');
     return text;
+  }
+
+  function esc(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   // ── Init ─────────────────────────────────
