@@ -32,7 +32,7 @@ The whole pipeline streams live in your browser so you can watch each agent work
 ## Setup
 
 ```bash
-git clone https://github.com/sinaghodsi/content-king.git
+git clone https://github.com/sinaghodsi93/content-king.git
 cd content-king
 npm install
 ```
