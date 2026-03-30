@@ -173,7 +173,7 @@ app.get("/api/run/:stepId", async (req, res) => {
         case "result":
           send("result", {
             subtype: message.subtype,
-            result: message.result?.slice(0, 2000),
+            result: message.subtype === "success" ? message.result.slice(0, 2000) : undefined,
           });
           break;
       }
