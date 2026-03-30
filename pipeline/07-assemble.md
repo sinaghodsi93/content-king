@@ -23,7 +23,7 @@ Assemble the final content into a clean, production-ready output file.
 
 Determine the brand name and content type from the validated brief.
 
-Write the final assembled content to `output/[brand-name]-[content-type].md` (in the project root's output directory, e.g., `../output/acme-launch-video.md`).
+Write the final assembled content to `output/[brand-name]-[content-type]-[YYYYMMDD-HHmmss].md` (in the project root's output directory, e.g., `output/acme-launch-video-20260328-143022.md`). Use the current date and time for the timestamp. This ensures each run produces a unique file and never overwrites previous outputs.
 
 The file should contain:
 1. A title header with brand name and content type

@@ -2,10 +2,12 @@
 
 Read these files:
 - `workspace/00-brief-validated.md` (product brief, content type, budgets)
-- `workspace/01-research-youtube.md` (YouTube research)
-- `workspace/02-research-x.md` (X/Twitter research)
+- `workspace/01-research-youtube.md` (YouTube research) — skip if file doesn't exist
+- `workspace/02-research-x.md` (X/Twitter research) — skip if file doesn't exist
 - `workspace/03-hooks.md` (hook options)
 - `workspace/04-body.md` (body content)
+
+**Note:** Not all research files will exist. Only read the ones that are present — the pipeline skips research channels that aren't relevant to the content type.
 
 You write the close — the final moment that converts the audience into action-takers. You write 2 options: one direct, one soft.
 

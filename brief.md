@@ -1,18 +1,18 @@
 # Content Request
 
 ## What to generate
-Launch video script, 60s
+Twitter/X thread, 5
 
 ## Product Brief
-- **Brand/Product Name:** yolidue
-- **What it does:** An AI coaching companion that keeps indie hackers building every single day. Three minutes. That's all it takes.
-- **Who it's for:** indie hackers and solo founders
+- **Brand/Product Name:** content king
+- **What it does:** You describe your product → AI researches your market → Agents write & refine content → Quality-checked output
+- **Who it's for:** indie hackers
 - **Key features:**
-  - Streak Tracking
-  - Coach Pulse
-  - Voice-First
-  - Project Management
-  - Progress Reviews
-  - Bring Your Own Key
-- **What makes it different:** [not specified]
-- **Tone:** hype
+  - launch video scripts
+  - x threads
+  - youtube ad scripts
+  - landing page hero
+  - product hunt launch
+- **What makes it different:** it doesnt generate content on its own
+it learns about the content that has gained engagement in the context of analyzes them and then iterate on the content to have the most chance to do it
+- **Tone:** playful

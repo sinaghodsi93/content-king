@@ -1,5 +1,5 @@
 import express from "express";
-import { readdir, readFile } from "fs/promises";
+import { readdir, readFile, stat } from "fs/promises";
 import { join, basename } from "path";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 
@@ -8,6 +8,10 @@ const app = express();
 // Track active step abort controllers
 let activeAbort: AbortController | null = null;
 const PORT = 3111;
+
+// Session state: tracks which steps to skip and the current session directory
+let skipSteps: string[] = [];
+let sessionDir: string = "workspace"; // default, overridden per run
 
 // Configure your pipeline directory (where .md files live)
 const PIPELINE_DIR = process.env.PIPELINE_DIR || "./pipeline";
@@ -19,16 +23,34 @@ app.use(express.json());
 // ── API: Save product brief ───────────────────────────────────────
 app.post("/api/brief", async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, contentType, brandName } = req.body;
     if (!content) {
       res.status(400).json({ error: "No content provided" });
       return;
     }
     const { writeFile, mkdir } = await import("fs/promises");
+
+    // Build session directory: workspace/YYYYMMDD-HHmmss-brandname
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const safeBrand = (brandName || "unknown").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+    sessionDir = `workspace/${ts}-${safeBrand}`;
+    await mkdir(join(WORKING_DIR, sessionDir), { recursive: true });
+    await mkdir(join(WORKING_DIR, "output"), { recursive: true });
+
+    // Determine which research steps to skip based on content type
+    const researchMap: Record<string, string[]> = {
+      "twitter-thread": ["01-research-youtube"],   // X content → skip YouTube
+      "youtube-ad":     ["02-research-x"],          // YouTube content → skip X
+      "launch-video":   [],                         // Videos benefit from both
+      "landing-page":   [],                         // Landing pages benefit from both
+      "product-hunt":   [],                         // Product Hunt benefits from both
+    };
+    skipSteps = researchMap[contentType] || [];
+
     await writeFile(join(WORKING_DIR, "brief.md"), content, "utf-8");
-    // Ensure workspace dir exists
-    await mkdir(join(WORKING_DIR, "workspace"), { recursive: true });
-    res.json({ ok: true });
+    res.json({ ok: true, sessionDir, skipSteps });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -87,12 +109,25 @@ app.get("/api/run/:stepId", async (req, res) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
+  // Check if this step should be skipped
+  if (skipSteps.includes(stepId)) {
+    send("status", { message: `Skipping step: ${stepId} (not needed for this content type)`, phase: "skipped" });
+    send("done", { message: "Step skipped" });
+    res.end();
+    return;
+  }
+
   // Set up abort controller for this run
   const abortController = new AbortController();
   activeAbort = abortController;
 
   try {
-    const promptContent = await readFile(filePath, "utf-8");
+    let promptContent = await readFile(filePath, "utf-8");
+
+    // Replace workspace/ references with the session-specific directory
+    // This ensures each run uses its own isolated directory and never conflicts
+    promptContent = promptContent.replaceAll("workspace/", `${sessionDir}/`);
+
     send("status", { message: `Running step: ${stepId}`, phase: "starting" });
 
     const stream = query({
@@ -166,6 +201,79 @@ app.get("/api/steps/:stepId/content", async (req, res) => {
     res.json({ content });
   } catch {
     res.status(404).json({ error: "Step not found" });
+  }
+});
+
+// ── API: List output files ────────────────────────────────────────
+app.get("/api/outputs", async (_req, res) => {
+  try {
+    const outputDir = join(WORKING_DIR, "output");
+    const files = await readdir(outputDir);
+    const mdFiles = files.filter((f) => f.endsWith(".md")).sort().reverse();
+
+    const outputs = await Promise.all(
+      mdFiles.map(async (file) => {
+        const filePath = join(outputDir, file);
+        const content = await readFile(filePath, "utf-8");
+        const stats = await stat(filePath);
+
+        // Parse first line as title
+        const firstLine = content.split("\n").find((l) => l.trim())?.replace(/^#+\s*/, "") || file;
+
+        // Extract metadata table if present
+        const metaMatch = content.match(/## Metadata\n\n\|[\s\S]*?\n((?:\|.*\n)*)/);
+        const metadata: Record<string, string> = {};
+        if (metaMatch) {
+          for (const row of metaMatch[0].split("\n").slice(2)) {
+            const cols = row.split("|").map((c) => c.trim()).filter(Boolean);
+            if (cols.length >= 2) {
+              const key = cols[0].replace(/\*\*/g, "").trim();
+              const val = cols[1].replace(/\*\*/g, "").trim();
+              if (key && val) metadata[key] = val;
+            }
+          }
+        }
+
+        // Extract subtitle line (the blockquote after the title)
+        const subtitleMatch = content.match(/^>\s*(.+)$/m);
+
+        return {
+          filename: file,
+          title: firstLine,
+          subtitle: subtitleMatch ? subtitleMatch[1].replace(/\*\*/g, "") : null,
+          contentType: metadata["Content Type"] || null,
+          date: metadata["Date Generated"] || stats.mtime.toISOString().split("T")[0],
+          wordCount: metadata["Word Count"] || null,
+          weaponsCheck: metadata["Weapons Check Pass Rate"] || null,
+          size: content.length,
+        };
+      })
+    );
+
+    res.json(outputs);
+  } catch (err: any) {
+    res.json([]);
+  }
+});
+
+// ── API: Get a single output file ─────────────────────────────────
+app.get("/api/outputs/:filename", async (req, res) => {
+  try {
+    const content = await readFile(join(WORKING_DIR, "output", req.params.filename), "utf-8");
+    res.json({ content });
+  } catch {
+    res.status(404).json({ error: "Output not found" });
+  }
+});
+
+// ── API: Delete an output file ────────────────────────────────────
+app.delete("/api/outputs/:filename", async (req, res) => {
+  try {
+    const { unlink } = await import("fs/promises");
+    await unlink(join(WORKING_DIR, "output", req.params.filename));
+    res.json({ ok: true });
+  } catch {
+    res.status(404).json({ error: "Output not found" });
   }
 });
 

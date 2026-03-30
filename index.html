@@ -418,14 +418,16 @@
     display: grid;
     grid-template-columns: 360px 1fr;
     overflow: hidden;
+    height: calc(100vh - 65px);
   }
 
   /* ── Journey Sidebar ───────────────────── */
   .journey {
+    position: relative;
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
   }
 
   .journey-header {
@@ -541,6 +543,19 @@
     color: var(--error);
   }
 
+  .j-step.status-skipped .j-step-icon {
+    background: rgba(255,255,255,0.03);
+    border-color: var(--border);
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+
+  .j-step.status-skipped .j-step-name {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
   @keyframes pulseRing {
     0%, 100% { box-shadow: 0 0 0 0 var(--amber-glow); }
     50% { box-shadow: 0 0 0 8px transparent; }
@@ -583,12 +598,13 @@
   .j-step.status-running .j-step-status { color: var(--amber-text); }
   .j-step.status-error .j-step-status { color: var(--error); }
   .j-step.status-idle .j-step-status { color: var(--text-dim); }
+  .j-step.status-skipped .j-step-status { color: var(--text-dim); opacity: 0.6; }
 
   /* ── Main Output Panel ─────────────────── */
   .output-panel {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
   }
 
   .output-header {
@@ -874,22 +890,476 @@
     animation: spin 0.8s linear infinite;
   }
 
+  /* ── Mobile Menu Toggle ──────────────── */
+  .sidebar-toggle {
+    display: none !important;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text-mid);
+    transition: all 0.15s;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar-toggle:hover {
+    border-color: var(--border-active);
+    color: var(--text);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .sidebar-overlay.visible {
+    opacity: 1;
+  }
+
   /* ── Responsive ────────────────────────── */
   @media (max-width: 800px) {
+    .sidebar-toggle.pipeline-active {
+      display: flex !important;
+    }
+
     .pipeline-layout {
       grid-template-columns: 1fr;
+      height: calc(100vh - 65px);
     }
+
     .journey {
-      max-height: 260px;
-      border-right: none;
-      border-bottom: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      max-width: 85vw;
+      z-index: 210;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
     }
+
+    .journey.open {
+      transform: translateX(0);
+    }
+
+    .journey-close {
+      display: flex;
+    }
+
     .how-it-works {
       flex-direction: column;
     }
     .how-arrow { display: none; }
     .form-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  .journey-close {
+    display: none;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-mid);
+    font-size: 18px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    z-index: 1;
+  }
+
+  .journey-close:hover {
+    border-color: var(--border-active);
+    color: var(--text);
+  }
+
+  /* ── PHASE 4: Outputs Viewer ──────────── */
+  .phase-outputs {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    animation: fadeUp 0.4s ease-out;
+  }
+
+  .phase-outputs.visible {
+    display: flex;
+  }
+
+  .outputs-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    overflow: hidden;
+    height: calc(100vh - 65px);
+  }
+
+  /* ── Output List Sidebar ────────────── */
+  .output-list {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .output-list-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .output-list-header h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .output-list-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 3px 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+  }
+
+  .output-list-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  .output-item {
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+  }
+
+  .output-item:hover {
+    background: var(--surface);
+  }
+
+  .output-item.active {
+    background: var(--surface-2);
+    border-color: var(--border);
+  }
+
+  .output-item-type {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber-text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .output-item-type .weapon-badge {
+    color: var(--success);
+    font-weight: 500;
+  }
+
+  .output-item-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .output-item-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .output-list-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dim);
+    text-align: center;
+    gap: 12px;
+    padding: 32px;
+  }
+
+  .output-list-empty .empty-icon {
+    font-size: 32px;
+    opacity: 0.3;
+  }
+
+  .output-list-empty p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* ── Output Viewer Panel ────────────── */
+  .output-viewer {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .output-viewer-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .output-viewer-header h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .output-viewer-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-viewer {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-viewer:hover {
+    border-color: var(--border-active);
+    color: var(--text);
+  }
+
+  .btn-viewer.danger:hover {
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  .output-viewer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 40px 64px;
+  }
+
+  .output-viewer-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-dim);
+    text-align: center;
+    gap: 12px;
+  }
+
+  .output-viewer-empty .empty-icon {
+    font-size: 32px;
+    opacity: 0.3;
+  }
+
+  /* ── Rendered Markdown ──────────────── */
+  .rendered-md {
+    max-width: 720px;
+    margin: 0 auto;
+    font-family: var(--sans);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .rendered-md h1 {
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .rendered-md h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    margin-top: 40px;
+    margin-bottom: 16px;
+    color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rendered-md h2:first-child {
+    margin-top: 0;
+  }
+
+  .rendered-md h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    color: var(--amber-text);
+  }
+
+  .rendered-md p {
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+
+  .rendered-md blockquote {
+    margin: 0 0 20px 0;
+    padding: 12px 20px;
+    border-left: 3px solid var(--amber);
+    background: var(--amber-glow);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--text-mid);
+    font-size: 14px;
+  }
+
+  .rendered-md blockquote strong {
+    color: var(--amber-text);
+  }
+
+  .rendered-md hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  .rendered-md ul, .rendered-md ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+  }
+
+  .rendered-md li {
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .rendered-md strong {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .rendered-md em {
+    font-style: italic;
+    color: var(--text-mid);
+  }
+
+  .rendered-md code {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 2px 8px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--amber-text);
+  }
+
+  .rendered-md table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .rendered-md th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .rendered-md td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .rendered-md tr:hover td {
+    background: var(--surface);
+  }
+
+  /* Tweet card styling for thread content */
+  .rendered-md h2 + p,
+  .rendered-md h2 + p + p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 800px) {
+    .outputs-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .output-list {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      max-width: 85vw;
+      z-index: 210;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .output-list.open {
+      transform: translateX(0);
+    }
+
+    .output-viewer-body {
+      padding: 24px 20px 48px;
     }
   }
 </style>
@@ -904,6 +1374,7 @@
       <h1>Content <span>King</span></h1>
     </div>
     <div class="nav-status" id="navStatus"></div>
+    <button class="sidebar-toggle" id="sidebarToggle">☰ Steps</button>
     <div class="nav-actions" id="navActions"></div>
   </nav>
 
@@ -1001,8 +1472,12 @@
   <!-- ─── PHASE 2: Pipeline Running ────────── -->
   <div class="phase-pipeline" id="phasePipeline">
     <div class="pipeline-layout">
+      <!-- Sidebar overlay (mobile) -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
       <!-- Journey sidebar -->
-      <div class="journey">
+      <div class="journey" id="journeySidebar">
+        <button class="journey-close" id="journeyClose">×</button>
         <div class="journey-header">
           <h3>Your Content Journey</h3>
           <div class="journey-sub" id="journeySub">Starting up...</div>
@@ -1049,15 +1524,63 @@
   <div class="phase-complete" id="phaseComplete">
     <div class="complete-icon">🎉</div>
     <div class="complete-title">Your content is ready!</div>
-    <div class="complete-sub" id="completeSub">Open <code>viewer.html</code> in your browser and drag in the generated file from the <code>output/</code> folder to see it beautifully formatted.</div>
+    <div class="complete-sub" id="completeSub">Your content has been generated and quality-checked. View it now or start a new brief.</div>
     <div class="complete-actions">
+      <button class="btn-complete primary" id="btnViewOutput">View Output</button>
       <button class="btn-complete" id="btnNewBrief">Start New Brief</button>
       <button class="btn-complete" id="btnViewPipeline">View Pipeline Details</button>
+    </div>
+  </div>
+
+  <!-- ─── PHASE 4: Outputs Viewer ──────────── -->
+  <div class="phase-outputs" id="phaseOutputs">
+    <div class="outputs-layout">
+      <div class="output-list" id="outputList">
+        <div class="output-list-header">
+          <h3>Generated Content</h3>
+          <span class="output-list-count" id="outputListCount">0</span>
+        </div>
+        <div class="output-list-items" id="outputListItems"></div>
+      </div>
+      <div class="output-viewer">
+        <div class="output-viewer-header">
+          <h3 id="viewerTitle">Select a file</h3>
+          <div class="output-viewer-actions" id="viewerActions"></div>
+        </div>
+        <div class="output-viewer-body" id="viewerBody">
+          <div class="output-viewer-empty">
+            <div class="empty-icon">📄</div>
+            <p>Select a file from the sidebar<br>to view your generated content.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+  // ── Mobile sidebar toggle ───────────────
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const journeySidebar = document.getElementById('journeySidebar');
+  const journeyClose = document.getElementById('journeyClose');
+
+  function openSidebar() {
+    journeySidebar.classList.add('open');
+    sidebarOverlay.style.display = 'block';
+    requestAnimationFrame(() => sidebarOverlay.classList.add('visible'));
+  }
+
+  function closeSidebar() {
+    journeySidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('visible');
+    setTimeout(() => { sidebarOverlay.style.display = 'none'; }, 300);
+  }
+
+  sidebarToggle.addEventListener('click', openSidebar);
+  sidebarOverlay.addEventListener('click', closeSidebar);
+  journeyClose.addEventListener('click', closeSidebar);
+
   // ── Friendly step metadata ────────────────
   const STEP_META = {
     '00-brief':            { icon: '📋', name: 'Validate Brief',       desc: 'Checking your inputs and setting word budgets' },
@@ -1079,11 +1602,15 @@
   let pipelinePaused = false;
   let pipelineAborted = false;
   let showDetails = false;
+  let skipSteps = [];
+  let currentSessionDir = null;
+  let selectedOutputFile = null;
 
   // ── Elements ─────────────────────────────
   const phaseBrief = document.getElementById('phaseBrief');
   const phasePipeline = document.getElementById('phasePipeline');
   const phaseComplete = document.getElementById('phaseComplete');
+  const phaseOutputs = document.getElementById('phaseOutputs');
   const navStatus = document.getElementById('navStatus');
   const navActions = document.getElementById('navActions');
   const journeySteps = document.getElementById('journeySteps');
@@ -1107,14 +1634,25 @@
     phasePipeline.classList.remove('visible');
     phaseComplete.style.display = 'none';
     phaseComplete.classList.remove('visible');
+    phaseOutputs.style.display = 'none';
+    phaseOutputs.classList.remove('visible');
+
+    sidebarToggle.classList.remove('pipeline-active');
+    closeSidebar();
 
     if (phase === 'pipeline') {
       phasePipeline.style.display = 'flex';
       phasePipeline.classList.add('visible');
+      sidebarToggle.classList.add('pipeline-active');
     }
     if (phase === 'complete') {
       phaseComplete.style.display = 'flex';
       phaseComplete.classList.add('visible');
+    }
+    if (phase === 'outputs') {
+      phaseOutputs.style.display = 'flex';
+      phaseOutputs.classList.add('visible');
+      loadOutputs();
     }
 
     updateNav(phase);
@@ -1123,7 +1661,16 @@
   function updateNav(phase) {
     if (phase === 'brief') {
       navStatus.innerHTML = '';
-      navActions.innerHTML = '';
+      navActions.innerHTML = `<button class="btn-nav" id="btnNavOutputs">View Outputs</button>`;
+      document.getElementById('btnNavOutputs')?.addEventListener('click', () => showPhase('outputs'));
+    } else if (phase === 'outputs') {
+      navStatus.innerHTML = '';
+      navActions.innerHTML = `<button class="btn-nav" id="btnNavNewBrief">New Brief</button>`;
+      document.getElementById('btnNavNewBrief')?.addEventListener('click', () => {
+        showPhase('brief');
+        launchBtn.disabled = false;
+        launchBtn.innerHTML = 'Generate Content <span class="arrow">→</span>';
+      });
     } else if (phase === 'pipeline') {
       navStatus.innerHTML = '<div class="live-dot"></div> Pipeline running';
       navActions.innerHTML = `
@@ -1160,7 +1707,7 @@
 
   // ── Render journey sidebar ───────────────
   function renderJourney() {
-    const doneCount = steps.filter(s => stepStatuses[s.id] === 'done').length;
+    const doneCount = steps.filter(s => stepStatuses[s.id] === 'done' || stepStatuses[s.id] === 'skipped').length;
     const total = steps.length;
     const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
@@ -1175,13 +1722,14 @@
 
       let statusLabel = '';
       if (status === 'done') statusLabel = '✓ Done';
+      else if (status === 'skipped') statusLabel = '⊘ Skipped';
       else if (status === 'running') statusLabel = '<div class="spinner"></div> Working...';
       else if (status === 'error') statusLabel = '✗ Error';
       else statusLabel = 'Waiting';
 
       return `
         <div class="j-step status-${status} ${isActive ? 'active' : ''}" data-id="${s.id}">
-          <div class="j-step-icon">${status === 'done' ? '✓' : meta.icon}</div>
+          <div class="j-step-icon">${status === 'done' ? '✓' : status === 'skipped' ? '⊘' : meta.icon}</div>
           <div class="j-step-content">
             <div class="j-step-name">${meta.name}</div>
             <div class="j-step-desc">${meta.desc}</div>
@@ -1270,8 +1818,12 @@
       });
 
       es.onerror = () => {
-        es.close();
-        if (isRunning) finish('error');
+        // EventSource fires onerror when the server closes the connection.
+        // Only treat it as an error if we haven't already finished (via 'done' event).
+        if (stepStatuses[stepId] === 'running') {
+          es.close();
+          finish('error');
+        }
       };
 
       function finish(status) {
@@ -1294,7 +1846,15 @@
     for (let i = startIdx; i < steps.length; i++) {
       const step = steps[i];
 
-      if (stepStatuses[step.id] === 'done') continue;
+      if (stepStatuses[step.id] === 'done' || stepStatuses[step.id] === 'skipped') continue;
+
+      // Skip steps that aren't needed for this content type
+      if (skipSteps.includes(step.id)) {
+        stepStatuses[step.id] = 'skipped';
+        renderJourney();
+        appendMsg('system', `Skipping ${(STEP_META[step.id] || {}).name || step.id} — not needed for this content type`);
+        continue;
+      }
 
       if (pipelinePaused) {
         journeySub.textContent = `Paused before: ${(STEP_META[step.id] || {}).name || step.id}`;
@@ -1357,7 +1917,8 @@
 
   function getNextStepIndex() {
     for (let i = 0; i < steps.length; i++) {
-      if (stepStatuses[steps[i].id] !== 'done') return i;
+      const st = stepStatuses[steps[i].id];
+      if (st !== 'done' && st !== 'skipped') return i;
     }
     return steps.length;
   }
@@ -1390,6 +1951,8 @@
     pipelinePaused = false;
     pipelineAborted = false;
     isRunning = false;
+    skipSteps = [];
+    currentSessionDir = null;
     outputStream.innerHTML = '';
   }
 
@@ -1483,9 +2046,12 @@
       const res = await fetch('/api/brief', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: brief }),
+        body: JSON.stringify({ content: brief, contentType: type, brandName: name }),
       });
       if (!res.ok) throw new Error('Failed to save');
+      const data = await res.json();
+      skipSteps = data.skipSteps || [];
+      currentSessionDir = data.sessionDir || null;
 
       // Start pipeline
       runPipeline(0);
@@ -1504,6 +2070,10 @@
     launchBtn.innerHTML = 'Generate Content <span class="arrow">→</span>';
   });
 
+  document.getElementById('btnViewOutput').addEventListener('click', () => {
+    showPhase('outputs');
+  });
+
   document.getElementById('btnViewPipeline').addEventListener('click', () => {
     showPhase('pipeline');
     navStatus.innerHTML = '<span style="color:var(--success)">✓ Complete</span>';
@@ -1515,6 +2085,250 @@
       launchBtn.innerHTML = 'Generate Content <span class="arrow">→</span>';
     });
   });
+
+  // ── Outputs Viewer ─────────────────────────
+  const outputListItems = document.getElementById('outputListItems');
+  const outputListCount = document.getElementById('outputListCount');
+  const viewerTitle = document.getElementById('viewerTitle');
+  const viewerBody = document.getElementById('viewerBody');
+  const viewerActions = document.getElementById('viewerActions');
+
+  async function loadOutputs() {
+    try {
+      const res = await fetch('/api/outputs');
+      const outputs = await res.json();
+      outputListCount.textContent = outputs.length;
+
+      if (outputs.length === 0) {
+        outputListItems.innerHTML = `
+          <div class="output-list-empty">
+            <div class="empty-icon">📭</div>
+            <p>No outputs yet.<br>Run the pipeline to generate content.</p>
+          </div>
+        `;
+        return;
+      }
+
+      outputListItems.innerHTML = outputs.map(o => {
+        const typeIcons = {
+          'Twitter/X Thread': '🐦',
+          'Launch Video Script': '🎬',
+          'YouTube Ad Script': '📺',
+          'Landing Page Hero': '🖥',
+          'Product Hunt Launch': '🚀',
+        };
+        const icon = typeIcons[o.contentType] || '📄';
+
+        return `
+          <div class="output-item ${selectedOutputFile === o.filename ? 'active' : ''}" data-filename="${o.filename}">
+            <div class="output-item-type">
+              ${icon} ${o.contentType || 'Content'}
+              ${o.weaponsCheck ? `<span class="weapon-badge">✓ ${o.weaponsCheck}</span>` : ''}
+            </div>
+            <div class="output-item-title">${o.title}</div>
+            <div class="output-item-meta">
+              <span>${o.date}</span>
+              ${o.wordCount ? `<span>${o.wordCount}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      outputListItems.querySelectorAll('.output-item').forEach(el => {
+        el.addEventListener('click', () => selectOutput(el.dataset.filename));
+      });
+
+      // Auto-select first item if none selected
+      if (!selectedOutputFile && outputs.length > 0) {
+        selectOutput(outputs[0].filename);
+      }
+    } catch (err) {
+      console.error('Failed to load outputs:', err);
+    }
+  }
+
+  async function selectOutput(filename) {
+    selectedOutputFile = filename;
+
+    // Update active state in sidebar
+    outputListItems.querySelectorAll('.output-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.filename === filename);
+    });
+
+    viewerTitle.textContent = filename;
+    viewerActions.innerHTML = `
+      <button class="btn-viewer" id="btnCopyRaw" title="Copy raw markdown">Copy Raw</button>
+      <button class="btn-viewer" id="btnCopyClean" title="Copy content without metadata">Copy Clean</button>
+      <button class="btn-viewer danger" id="btnDeleteOutput" title="Delete this file">Delete</button>
+    `;
+
+    try {
+      const res = await fetch(`/api/outputs/${encodeURIComponent(filename)}`);
+      const { content } = await res.json();
+
+      viewerBody.innerHTML = `<div class="rendered-md">${renderMarkdown(content)}</div>`;
+
+      document.getElementById('btnCopyRaw').addEventListener('click', () => {
+        navigator.clipboard.writeText(content);
+        const btn = document.getElementById('btnCopyRaw');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Raw'; }, 1500);
+      });
+
+      document.getElementById('btnCopyClean').addEventListener('click', () => {
+        // Strip metadata section
+        const clean = content.replace(/---\n\n---\n\n## Metadata[\s\S]*$/, '').trim();
+        navigator.clipboard.writeText(clean);
+        const btn = document.getElementById('btnCopyClean');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Clean'; }, 1500);
+      });
+
+      document.getElementById('btnDeleteOutput').addEventListener('click', async () => {
+        if (!confirm(`Delete ${filename}?`)) return;
+        await fetch(`/api/outputs/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+        selectedOutputFile = null;
+        viewerBody.innerHTML = `
+          <div class="output-viewer-empty">
+            <div class="empty-icon">📄</div>
+            <p>Select a file from the sidebar<br>to view your generated content.</p>
+          </div>
+        `;
+        viewerTitle.textContent = 'Select a file';
+        viewerActions.innerHTML = '';
+        loadOutputs();
+      });
+    } catch (err) {
+      viewerBody.innerHTML = `<div class="output-viewer-empty"><p>Failed to load file.</p></div>`;
+    }
+  }
+
+  // ── Simple Markdown Renderer ──────────────
+  function renderMarkdown(md) {
+    // Escape HTML first
+    let html = md
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Code blocks (``` ... ```)
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre><code>${code.trim()}</code></pre>`
+    );
+
+    // Tables
+    html = html.replace(/^(\|.+\|)\n(\|[\s-:|]+\|)\n((?:\|.+\|\n?)*)/gm, (_, header, sep, body) => {
+      const th = header.split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
+      const rows = body.trim().split('\n').map(row => {
+        const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+        return `<tr>${cells}</tr>`;
+      }).join('');
+      return `<table><thead><tr>${th}</tr></thead><tbody>${rows}</tbody></table>`;
+    });
+
+    // Process line by line for block elements
+    const lines = html.split('\n');
+    let result = [];
+    let inList = false;
+    let listType = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+
+      // Skip if inside a table or pre block (already processed)
+      if (line.startsWith('<table') || line.startsWith('<pre') || line.startsWith('<thead') ||
+          line.startsWith('<tbody') || line.startsWith('<tr') || line.startsWith('</')) {
+        if (inList) { result.push(`</${listType}>`); inList = false; }
+        result.push(line);
+        continue;
+      }
+
+      // Headings
+      if (line.match(/^#{1,6}\s/)) {
+        if (inList) { result.push(`</${listType}>`); inList = false; }
+        const level = line.match(/^(#{1,6})/)[1].length;
+        const text = line.replace(/^#{1,6}\s+/, '');
+        result.push(`<h${level}>${inlineFormat(text)}</h${level}>`);
+        continue;
+      }
+
+      // Horizontal rule
+      if (line.match(/^(-{3,}|\*{3,}|_{3,})$/)) {
+        if (inList) { result.push(`</${listType}>`); inList = false; }
+        result.push('<hr>');
+        continue;
+      }
+
+      // Blockquote
+      if (line.startsWith('&gt; ') || line === '&gt;') {
+        if (inList) { result.push(`</${listType}>`); inList = false; }
+        const text = line.replace(/^&gt;\s?/, '');
+        result.push(`<blockquote>${inlineFormat(text)}</blockquote>`);
+        continue;
+      }
+
+      // Unordered list
+      if (line.match(/^[\s]*[-*+]\s/)) {
+        const text = line.replace(/^[\s]*[-*+]\s+/, '');
+        if (!inList || listType !== 'ul') {
+          if (inList) result.push(`</${listType}>`);
+          result.push('<ul>');
+          inList = true;
+          listType = 'ul';
+        }
+        result.push(`<li>${inlineFormat(text)}</li>`);
+        continue;
+      }
+
+      // Ordered list
+      if (line.match(/^[\s]*\d+\.\s/)) {
+        const text = line.replace(/^[\s]*\d+\.\s+/, '');
+        if (!inList || listType !== 'ol') {
+          if (inList) result.push(`</${listType}>`);
+          result.push('<ol>');
+          inList = true;
+          listType = 'ol';
+        }
+        result.push(`<li>${inlineFormat(text)}</li>`);
+        continue;
+      }
+
+      // Close list if needed
+      if (inList && line.trim() === '') {
+        result.push(`</${listType}>`);
+        inList = false;
+      }
+
+      // Empty line
+      if (line.trim() === '') {
+        continue;
+      }
+
+      // Paragraph
+      if (inList) { result.push(`</${listType}>`); inList = false; }
+      result.push(`<p>${inlineFormat(line)}</p>`);
+    }
+
+    if (inList) result.push(`</${listType}>`);
+
+    return result.join('\n');
+  }
+
+  function inlineFormat(text) {
+    // Inline code
+    text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // Bold + italic
+    text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    // Bold
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Italic
+    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // Links
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--amber-text)">$1</a>');
+    // Unicode arrows that got escaped
+    text = text.replace(/→/g, '→');
+    return text;
+  }
 
   // ── Init ─────────────────────────────────
   loadSteps();

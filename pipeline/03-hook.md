@@ -2,8 +2,10 @@
 
 Read these files:
 - `workspace/00-brief-validated.md` (product brief, content type, budgets)
-- `workspace/01-research-youtube.md` (YouTube research)
-- `workspace/02-research-x.md` (X/Twitter research)
+- `workspace/01-research-youtube.md` (YouTube research) — skip if file doesn't exist
+- `workspace/02-research-x.md` (X/Twitter research) — skip if file doesn't exist
+
+**Note:** Not all research files will exist. Only read the ones that are present — the pipeline skips research channels that aren't relevant to the content type.
 
 You write the opening — the first thing the audience sees. Whether it's the first 5 seconds of a video, the first tweet of a thread, the headline of a landing page, or the tagline of a Product Hunt post. Your job: stop the scroll, create instant curiosity, make it impossible to look away.
 
