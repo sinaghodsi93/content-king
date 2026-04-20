@@ -1,5 +1,7 @@
 # YouTube Research
 
+> **Content-type gate**: Only run this step for **Launch Video Script** and **YouTube Ad Script**. Skip entirely for Product Hunt, Twitter/X Thread, and Landing Page Hero — write an empty placeholder to `workspace/01-research-youtube.md` with the note "Skipped — not applicable for this content type" and move on.
+
 Read the validated product brief from `workspace/00-brief-validated.md`.
 
 You are a YouTube research specialist. Your job is to find the highest-performing videos related to this product/brand and extract patterns that make them successful.
